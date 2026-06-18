@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Box, Tabs, Tab, IconButton, Tooltip, Typography } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -37,6 +37,15 @@ function getIconByType(type: PreviewType) {
 }
 
 export default function CellPreview({ cell }: Props) {
+  const [tab, setTab] = useState(TAB_MAIN);
+  const [imgIndex, setImgIndex] = useState(0);
+
+  // 当字段变化时重置状态
+  useEffect(() => {
+    setTab(TAB_MAIN);
+    setImgIndex(0);
+  }, [cell.fieldId, cell.recordId]);
+
   const resolved = useMemo(() => resolvePreview(cell.fieldName, cell.value), [cell]);
 
   // 附件类型：拆分为主图和附件列表
@@ -49,12 +58,9 @@ export default function CellPreview({ cell }: Props) {
     !/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(a.name || '')
   );
 
-  const [tab, setTab] = useState(TAB_MAIN);
-  const [imgIndex, setImgIndex] = useState(0);
-
   // 如果当前选中的是图片字段，显示图片预览
   if (isAttachment && images.length > 0) {
-    const currentImg = images[imgIndex];
+    const currentImg = images[imgIndex] || images[0];
     const total = images.length;
 
     return (
@@ -138,10 +144,10 @@ export default function CellPreview({ cell }: Props) {
             <ImageIcon fontSize="small" color="action" />
             <Box>
               <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
-                {currentImg.name}
+                {currentImg?.name || '未知文件'}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {currentImg.size ? `${(currentImg.size / 1024).toFixed(2)} KB` : ''} · 图片
+                {currentImg?.size ? `${(currentImg.size / 1024).toFixed(2)} KB` : ''} · 图片
               </Typography>
             </Box>
           </Box>
@@ -150,8 +156,8 @@ export default function CellPreview({ cell }: Props) {
               size="small"
               onClick={() => {
                 const a = document.createElement('a');
-                a.href = currentImg.url || currentImg.previewUrl || currentImg.tmpUrl || '';
-                a.download = currentImg.name;
+                a.href = currentImg?.url || currentImg?.previewUrl || currentImg?.tmpUrl || '';
+                a.download = currentImg?.name || 'download';
                 a.click();
               }}
             >
@@ -163,8 +169,8 @@ export default function CellPreview({ cell }: Props) {
         {/* 图片预览 */}
         <Box flex={1} overflow="auto" display="flex" justifyContent="center" alignItems="center" p={1}>
           <ImagePreview
-            url={currentImg.url || currentImg.previewUrl || currentImg.tmpUrl || ''}
-            title={currentImg.name}
+            url={currentImg?.url || currentImg?.previewUrl || currentImg?.tmpUrl || ''}
+            title={currentImg?.name}
           />
         </Box>
       </Box>
@@ -200,6 +206,11 @@ export default function CellPreview({ cell }: Props) {
         {resolved.type === 'text' && (
           <Box p={2}>
             <Typography variant="body1" whiteSpace="pre-wrap">{resolved.content}</Typography>
+          </Box>
+        )}
+        {resolved.type === 'unsupported' && (
+          <Box p={2}>
+            <Typography variant="body2" color="text.secondary">该字段类型暂不支持预览</Typography>
           </Box>
         )}
       </Box>
