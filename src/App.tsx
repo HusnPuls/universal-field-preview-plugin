@@ -2,6 +2,7 @@ import { Box, Typography, CircularProgress, Alert } from '@mui/material';
 import { useSelectedCell } from './hooks/useSelectedCell';
 import EmptyState from './components/EmptyState';
 import CellPreview from './components/CellPreview';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   const { cell, loading, error } = useSelectedCell();
@@ -26,7 +27,11 @@ function App() {
     return <EmptyState />;
   }
 
-  return <CellPreview cell={cell} />;
+  return (
+    <ErrorBoundary>
+      <CellPreview cell={cell} />
+    </ErrorBoundary>
+  );
 }
 
 export default App;
