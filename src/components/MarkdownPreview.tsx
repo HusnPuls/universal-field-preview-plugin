@@ -21,6 +21,11 @@ export default function MarkdownPreview({ content, url }: Props) {
   const [text, setText] = useState(content);
   const [loading, setLoading] = useState(false);
 
+  // 当 content prop 变化时，更新内部状态
+  useEffect(() => {
+    setText(content);
+  }, [content]);
+
   useEffect(() => {
     if (url && !content) {
       setLoading(true);
