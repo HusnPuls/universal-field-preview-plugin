@@ -36,6 +36,18 @@ function getIconByType(type: PreviewType) {
   }
 }
 
+/** 判断是否为附件类型数据（数组或单个对象） */
+function isAttachmentData(value: any): boolean {
+  if (Array.isArray(value) && value.length > 0) {
+    const first = value[0];
+    return !!(first?.url || first?.tmpUrl || first?.type === 'attachment' || first?.previewUrl || first?.name);
+  }
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    return !!(value.url || value.tmpUrl || value.type === 'attachment' || value.previewUrl || value.name);
+  }
+  return false;
+}
+
 export default function CellPreview({ cell }: Props) {
   const [tab, setTab] = useState(TAB_MAIN);
   const [imgIndex, setImgIndex] = useState(0);
@@ -49,13 +61,10 @@ export default function CellPreview({ cell }: Props) {
   const resolved = useMemo(() => resolvePreview(cell.fieldName, cell.value), [cell]);
 
   // 附件类型：拆分为主图和附件列表
-  const isAttachment = Array.isArray(cell.value) && cell.value.length > 0 && cell.value[0]?.url;
-  const attachments = isAttachment ? cell.value : [];
+  const isAttachment = isAttachmentData(cell.value);
+  const attachments = Array.isArray(cell.value) ? cell.value : (cell.value ? [cell.value] : []);
   const images = attachments.filter((a: any) =>
     /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(a.name || '')
-  );
-  const others = attachments.filter((a: any) =>
-    !/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(a.name || '')
   );
 
   // 如果当前选中的是图片字段，显示图片预览
