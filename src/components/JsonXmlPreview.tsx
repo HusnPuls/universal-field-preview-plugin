@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Box, IconButton, Tooltip } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { JsonView } from 'react18-json-view';
+import JsonView from 'react18-json-view';
 import 'react18-json-view/style.css';
 import formatXml from 'xml-formatter';
 
