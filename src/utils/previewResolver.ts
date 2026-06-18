@@ -100,9 +100,22 @@ function isFeishuText(value: any): boolean {
   return false;
 }
 
+/** 检查是否为附件数组 */
+function isAttachmentArray(value: any): boolean {
+  if (!Array.isArray(value) || value.length === 0) return false;
+  const first = value[0];
+  return !!(first?.url || first?.tmpUrl || first?.type === 'attachment' || first?.name);
+}
+
+/** 检查是否为附件对象 */
+function isAttachmentObject(value: any): boolean {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  return !!(value.url || value.tmpUrl || value.type === 'attachment' || value.name);
+}
+
 export function resolvePreview(fieldName: string, value: any): ResolvedPreview {
-  // 附件类型
-  if (Array.isArray(value) && value.length > 0 && value[0]?.url) {
+  // 附件类型（数组）
+  if (isAttachmentArray(value)) {
     const first = value[0];
     const url = first.url || first.previewUrl || first.tmpUrl || '';
     const name = first.name || '';
@@ -117,6 +130,19 @@ export function resolvePreview(fieldName: string, value: any): ResolvedPreview {
     }
     if (/\.(xml)$/i.test(name)) {
       return { type: 'xml', content: url, url, title: name };
+    }
+    if (looksLikeUrl(url)) {
+      return { type: 'webpage', content: '', url, title: name };
+    }
+    return { type: 'text', content: JSON.stringify(value, null, 2), title: name };
+  }
+
+  // 附件类型（单个对象）
+  if (isAttachmentObject(value)) {
+    const url = value.url || value.previewUrl || value.tmpUrl || '';
+    const name = value.name || '';
+    if (/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(name)) {
+      return { type: 'image', content: '', url, title: name };
     }
     if (looksLikeUrl(url)) {
       return { type: 'webpage', content: '', url, title: name };
