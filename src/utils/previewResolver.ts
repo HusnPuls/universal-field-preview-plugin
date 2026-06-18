@@ -42,16 +42,16 @@ export interface ResolvedPreview {
 
 function isMarkdown(str: string): boolean {
   const mdPatterns = [
-    /^#\s+/m,           // 标题
-    /^\*\s+/m,          // 列表
-    /^-\s+/m,          // 列表
-    /^\*\*.*\*\*/m,     // 粗体
-    /^\[.*\]\(.*\)/m,   // 链接
-    /^```/m,            // 代码块
-    /^>\s+/m,          // 引用
-    /^\|.*\|/m,         // 表格
-    /^---/m,           // 分割线
-    /^__.*__/m,         // 粗体
+    /^#\s+/m,
+    /^\*\s+/m,
+    /^-\s+/m,
+    /^\*\*.*\*\*/m,
+    /^\[.*\]\(.*\)/m,
+    /^```/m,
+    /^>\s+/m,
+    /^\|.*\|/m,
+    /^---/m,
+    /^__.*__/m,
   ];
   return mdPatterns.some(p => p.test(str));
 }
@@ -91,11 +91,26 @@ export function resolvePreview(fieldName: string, value: any): ResolvedPreview {
     if (/\.(xml)$/i.test(name)) {
       return { type: 'xml', content: url, url, title: name };
     }
-    // 网页或通用文件
     if (looksLikeUrl(url)) {
       return { type: 'webpage', content: '', url, title: name };
     }
     return { type: 'text', content: JSON.stringify(value, null, 2), title: name };
+  }
+
+  // 飞书 URL 字段值格式: { type: 'url', text: '...', link: '...' }
+  if (value && typeof value === 'object' && value.type === 'url') {
+    const url = value.link || value.text || '';
+    if (looksLikeUrl(url)) {
+      return { type: 'webpage', content: '', url, title: fieldName };
+    }
+  }
+
+  // 飞书 URL 字段值格式（数组）: [{ type: 'url', text: '...', link: '...' }]
+  if (Array.isArray(value) && value.length > 0 && value[0]?.type === 'url') {
+    const url = value[0].link || value[0].text || '';
+    if (looksLikeUrl(url)) {
+      return { type: 'webpage', content: '', url, title: fieldName };
+    }
   }
 
   // 文本/URL 类型
@@ -109,27 +124,22 @@ export function resolvePreview(fieldName: string, value: any): ResolvedPreview {
   text = text.trim();
   if (!text) return { type: 'unsupported', content: '' };
 
-  // 纯 URL
   if (looksLikeUrl(text)) {
     return { type: 'webpage', content: '', url: text, title: fieldName };
   }
 
-  // JSON
   if (isJson(text)) {
     return { type: 'json', content: text, title: fieldName };
   }
 
-  // XML
   if (isXml(text)) {
     return { type: 'xml', content: text, title: fieldName };
   }
 
-  // Markdown
   if (isMarkdown(text)) {
     return { type: 'markdown', content: text, title: fieldName };
   }
 
-  // 默认文本/代码
   if (text.includes('\n') || text.length > 200) {
     return { type: 'code', content: text, title: fieldName };
   }
