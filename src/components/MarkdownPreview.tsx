@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Box, CircularProgress } from '@mui/material';
 import { Viewer } from 'bytemd';
+import React from 'react';
 import gfm from '@bytemd/plugin-gfm';
 import highlight from '@bytemd/plugin-highlight';
 import breaks from '@bytemd/plugin-breaks';
@@ -11,6 +12,7 @@ import 'highlight.js/styles/github.css';
 import 'katex/dist/katex.min.css';
 
 const plugins = [gfm(), highlight(), breaks(), math()];
+const ByteViewer = Viewer as React.ComponentType<any>;
 
 interface Props {
   content: string;
@@ -42,7 +44,7 @@ export default function MarkdownPreview({ content, url }: Props) {
 
   return (
     <Box className="github-markdown-body" height="100%" overflow="auto" p={2}>
-      <Viewer value={text} plugins={plugins} />
+      <ByteViewer value={text} plugins={plugins} />
     </Box>
   );
 }
