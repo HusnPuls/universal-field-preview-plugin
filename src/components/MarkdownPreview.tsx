@@ -12,7 +12,7 @@ import 'highlight.js/styles/github.css';
 import 'katex/dist/katex.min.css';
 
 const plugins = [gfm(), highlight(), breaks(), math()];
-const ByteViewer = Viewer as React.ComponentType<any>;
+const ByteViewer = Viewer as any;
 
 interface Props {
   content: string;
