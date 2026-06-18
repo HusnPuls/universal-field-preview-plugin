@@ -73,6 +73,33 @@ function looksLikeUrl(str: string): boolean {
   return /^https?:\/\/.+/i.test(str.trim());
 }
 
+/** 提取飞书文本字段的纯文本内容 */
+function extractFeishuText(value: any): string {
+  // 数组格式: [{type: "text", text: "..."}]
+  if (Array.isArray(value)) {
+    return value
+      .filter((item: any) => item && item.type === 'text' && item.text)
+      .map((item: any) => item.text)
+      .join('\n');
+  }
+  // 对象格式: {type: "text", text: "..."}
+  if (value && typeof value === 'object' && value.type === 'text' && value.text) {
+    return value.text;
+  }
+  return '';
+}
+
+/** 检查是否为飞书文本格式 */
+function isFeishuText(value: any): boolean {
+  if (Array.isArray(value) && value.length > 0 && value[0]?.type === 'text') {
+    return true;
+  }
+  if (value && typeof value === 'object' && value.type === 'text') {
+    return true;
+  }
+  return false;
+}
+
 export function resolvePreview(fieldName: string, value: any): ResolvedPreview {
   // 附件类型
   if (Array.isArray(value) && value.length > 0 && value[0]?.url) {
@@ -113,7 +140,24 @@ export function resolvePreview(fieldName: string, value: any): ResolvedPreview {
     }
   }
 
-  // 文本/URL 类型
+  // 飞书文本字段: [{type: "text", text: "..."}] 或 {type: "text", text: "..."}
+  if (isFeishuText(value)) {
+    const text = extractFeishuText(value);
+    if (text.trim()) {
+      if (isMarkdown(text)) {
+        return { type: 'markdown', content: text, title: fieldName };
+      }
+      if (isJson(text)) {
+        return { type: 'json', content: text, title: fieldName };
+      }
+      if (isXml(text)) {
+        return { type: 'xml', content: text, title: fieldName };
+      }
+      return { type: 'text', content: text, title: fieldName };
+    }
+  }
+
+  // 纯文本/URL 类型
   let text = '';
   if (typeof value === 'string') {
     text = value;
