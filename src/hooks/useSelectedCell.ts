@@ -19,9 +19,8 @@ export function useSelectedCell() {
       const table = await bitable.base.getActiveTable();
       const fieldMeta = await table.getFieldMetaById(fieldId);
       
-      // 使用 field.getCellValue 获取正确格式的值（附件字段等需要此方法）
-      const field = await table.getFieldById(fieldId);
-      const value = await field.getCellValue(recordId);
+      // 使用 table.getCellValue 获取正确格式的值（附件字段等需要此方法）
+      const value = await (table as any).getCellValue(fieldId, recordId);
       
       setCell({
         fieldId,
