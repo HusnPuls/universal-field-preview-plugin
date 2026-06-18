@@ -1,0 +1,38 @@
+{
+  "name": "universal-field-preview-plugin",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "飞书多维表格边栏插件 - 万能字段预览",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@bytemd/plugin-breaks": "^1.22.0",
+    "@bytemd/plugin-gfm": "^1.22.0",
+    "@bytemd/plugin-highlight": "^1.22.0",
+    "@bytemd/plugin-math": "^1.22.0",
+    "@bytemd/react": "^1.22.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@lark-base-open/js-sdk": "0.3.0-alpha",
+    "@mui/icons-material": "^7.3.1",
+    "@mui/material": "^7.3.1",
+    "bytemd": "^1.22.0",
+    "github-markdown-css": "^5.8.1",
+    "highlight.js": "^11.11.1",
+    "katex": "^0.16.22",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react18-json-view": "^0.2.9",
+    "xml-formatter": "^3.6.6"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.24",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "typescript": "^5.9.2",
+    "vite": "^5.4.19"
+  }
+}
