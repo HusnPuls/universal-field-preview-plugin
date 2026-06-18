@@ -46,7 +46,7 @@ export default function MarkdownPreview({ content, url }: Props) {
   }
 
   return (
-    <Box className="github-markdown-body" height="100%" overflow="auto" p={2}>
+    <Box className="github-markdown-body" height="100%" overflow="auto" p={2} pb={6}>
       <Viewer value={text} plugins={plugins} />
     </Box>
   );
