@@ -18,9 +18,21 @@ export function useSelectedCell() {
     try {
       const table = await bitable.base.getActiveTable();
       const fieldMeta = await table.getFieldMetaById(fieldId);
+      const field = await (table as any).getFieldById(fieldId);
       
-      // 使用 table.getCellValue 获取正确格式的值（附件字段等需要此方法）
-      const value = await (table as any).getCellValue(fieldId, recordId);
+      let value: any;
+      
+      // 附件字段（type=17）需要用 getAttachmentUrls 获取真实 URL
+      if (fieldMeta.type === 17 && field.getAttachmentUrls) {
+        value = await field.getAttachmentUrls(recordId);
+      } else if (field.getValue) {
+        // 其他字段尝试 getValue
+        value = await field.getValue(recordId);
+      } else {
+        // 降级：使用 record.fields
+        const record = await table.getRecordById(recordId);
+        value = record.fields[fieldId];
+      }
       
       setCell({
         fieldId,
