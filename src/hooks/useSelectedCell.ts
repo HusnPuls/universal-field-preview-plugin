@@ -17,10 +17,12 @@ export function useSelectedCell() {
   const loadCell = useCallback(async (recordId: string, fieldId: string) => {
     try {
       const table = await bitable.base.getActiveTable();
-      const record = await table.getRecordById(recordId);
       const fieldMeta = await table.getFieldMetaById(fieldId);
-      const value = record.fields[fieldId];
-
+      
+      // 使用 field.getCellValue 获取正确格式的值（附件字段等需要此方法）
+      const field = await table.getFieldById(fieldId);
+      const value = await field.getCellValue(recordId);
+      
       setCell({
         fieldId,
         fieldName: fieldMeta.name,
@@ -30,6 +32,22 @@ export function useSelectedCell() {
       });
     } catch (e) {
       console.error('loadCell error', e);
+      // 降级：尝试用 record.fields 获取
+      try {
+        const table = await bitable.base.getActiveTable();
+        const record = await table.getRecordById(recordId);
+        const fieldMeta = await table.getFieldMetaById(fieldId);
+        const value = record.fields[fieldId];
+        setCell({
+          fieldId,
+          fieldName: fieldMeta.name,
+          fieldType: fieldMeta.type,
+          recordId,
+          value,
+        });
+      } catch (e2) {
+        console.error('fallback error', e2);
+      }
     }
   }, []);
 
