@@ -73,7 +73,7 @@ export default function CellPreview({ cell }: Props) {
     const total = images.length;
 
     return (
-      <Box display="flex" flexDirection="column" height="100vh">
+      <Box display="flex" flexDirection="column" height="100%">
         {/* 顶部 Tab + 分页 */}
         <Box
           display="flex"
@@ -82,6 +82,7 @@ export default function CellPreview({ cell }: Props) {
           px={1.5}
           py={0.5}
           borderBottom="1px solid #e8e8e8"
+          flexShrink={0}
         >
           <Tabs value={tab} onChange={(_, v) => setTab(v)} textColor="primary" indicatorColor="primary" sx={{ minHeight: 36 }}>
             <Tab label="主图" value={TAB_MAIN} sx={{ minHeight: 36, px: 1.5, py: 0.5 }} />
@@ -108,6 +109,7 @@ export default function CellPreview({ cell }: Props) {
           py={0.5}
           borderBottom="1px solid #e8e8e8"
           bgcolor="#fafafa"
+          flexShrink={0}
         >
           {attachments.map((a: any, i: number) => (
             <Box
@@ -148,6 +150,7 @@ export default function CellPreview({ cell }: Props) {
           px={1.5}
           py={0.5}
           borderBottom="1px solid #e8e8e8"
+          flexShrink={0}
         >
           <Box display="flex" alignItems="center" gap={1}>
             <ImageIcon fontSize="small" color="action" />
@@ -176,7 +179,7 @@ export default function CellPreview({ cell }: Props) {
         </Box>
 
         {/* 图片预览 */}
-        <Box flex={1} overflow="auto" display="flex" justifyContent="center" alignItems="center" p={1}>
+        <Box flex={1} overflow="auto" display="flex" justifyContent="center" alignItems="center" p={1} minHeight={0}>
           <ImagePreview
             url={currentImg?.url || currentImg?.previewUrl || currentImg?.tmpUrl || ''}
             title={currentImg?.name}
@@ -188,7 +191,7 @@ export default function CellPreview({ cell }: Props) {
 
   // 非附件类型：直接根据 resolved 类型显示预览
   return (
-    <Box display="flex" flexDirection="column" height="100vh">
+    <Box display="flex" flexDirection="column" height="100%">
       <Box
         display="flex"
         alignItems="center"
@@ -197,6 +200,7 @@ export default function CellPreview({ cell }: Props) {
         py={1}
         borderBottom="1px solid #e8e8e8"
         bgcolor="#fafafa"
+        flexShrink={0}
       >
         {getIconByType(resolved.type)}
         <Typography variant="body2" fontWeight={500}>
@@ -206,14 +210,14 @@ export default function CellPreview({ cell }: Props) {
           {resolved.type}
         </Typography>
       </Box>
-      <Box flex={1} overflow="hidden">
+      <Box flex={1} overflow="auto" minHeight={0}>
         {resolved.type === 'markdown' && <MarkdownPreview content={resolved.content} url={resolved.url} />}
         {resolved.type === 'image' && <ImagePreview url={resolved.url!} title={resolved.title} />}
         {resolved.type === 'webpage' && <WebPreview url={resolved.url!} title={resolved.title} />}
         {(resolved.type === 'json' || resolved.type === 'xml') && <JsonXmlPreview content={resolved.content} type={resolved.type} />}
         {resolved.type === 'code' && <CodePreview content={resolved.content} language="text" />}
         {resolved.type === 'text' && (
-          <Box p={2}>
+          <Box p={2} pb={4}>
             <Typography variant="body1" whiteSpace="pre-wrap">{resolved.content}</Typography>
           </Box>
         )}
