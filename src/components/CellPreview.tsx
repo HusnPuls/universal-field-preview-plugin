@@ -74,10 +74,11 @@ export default function CellPreview({ cell }: Props) {
     return /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(checkName);
   });
 
-  // 如果当前选中的是图片字段，显示图片预览
-  if (isAttachment && images.length > 0) {
-    const currentImg = images[imgIndex] || images[0];
-    const total = images.length;
+  // 如果isAttachment为true但没有images，直接显示所有附件为图片
+  if (isAttachment && attachments.length > 0) {
+    const imagesToShow = images.length > 0 ? images : attachments;
+    const currentImg = imagesToShow[imgIndex] || imagesToShow[0];
+    const total = imagesToShow.length;
 
     return (
       <Box display="flex" flexDirection="column" height="100%">
@@ -108,47 +109,6 @@ export default function CellPreview({ cell }: Props) {
           </Box>
         </Box>
 
-        {/* 附件类型图标列表 */}
-        <Box
-          display="flex"
-          gap={0.5}
-          px={1.5}
-          py={0.5}
-          borderBottom="1px solid #e8e8e8"
-          bgcolor="#fafafa"
-          flexShrink={0}
-        >
-          {attachments.map((a: any, i: number) => (
-            <Box
-              key={i}
-              onClick={() => {
-                if (images.includes(a)) {
-                  setImgIndex(images.indexOf(a));
-                }
-              }}
-              sx={{
-                width: 32,
-                height: 32,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: 1,
-                cursor: images.includes(a) ? 'pointer' : 'default',
-                bgcolor: images.includes(a) && images.indexOf(a) === imgIndex ? '#e3f2fd' : 'transparent',
-                '&:hover': { bgcolor: images.includes(a) ? '#e3f2fd' : 'transparent' },
-              }}
-            >
-              {getIconByType(
-                (typeof a === 'string' ? a : (a.name || '')).match(/\.(jpg|jpeg|png|gif|webp|svg)$/) ? 'image' :
-                (typeof a === 'string' ? a : (a.name || '')).match(/\.(md|markdown)$/) ? 'markdown' :
-                (typeof a === 'string' ? a : (a.name || '')).match(/\.(json)$/) ? 'json' :
-                (typeof a === 'string' ? a : (a.name || '')).match(/\.(xml)$/) ? 'xml' :
-                'code'
-              )}
-            </Box>
-          ))}
-        </Box>
-
         {/* 文件信息栏 */}
         <Box
           display="flex"
@@ -163,7 +123,7 @@ export default function CellPreview({ cell }: Props) {
             <ImageIcon fontSize="small" color="action" />
             <Box>
               <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
-                {typeof currentImg === 'string' ? '图片' : (currentImg?.name || '未知文件')}
+                {typeof currentImg === 'string' ? '图片' : (currentImg?.name || '附件')}
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 {typeof currentImg !== 'string' && currentImg?.size ? `${(currentImg.size / 1024).toFixed(2)} KB` : ''} · 图片
