@@ -100,10 +100,13 @@ function isFeishuText(value: any): boolean {
   return false;
 }
 
-/** 检查是否为附件数组 */
+/** 检查是否为附件数组（支持对象数组和字符串URL数组） */
 function isAttachmentArray(value: any): boolean {
   if (!Array.isArray(value) || value.length === 0) return false;
   const first = value[0];
+  if (typeof first === 'string') {
+    return looksLikeUrl(first);
+  }
   return !!(first?.url || first?.tmpUrl || first?.type === 'attachment' || first?.name);
 }
 
@@ -117,6 +120,20 @@ export function resolvePreview(fieldName: string, value: any): ResolvedPreview {
   // 附件类型（数组）
   if (isAttachmentArray(value)) {
     const first = value[0];
+    // 字符串数组（URL数组）
+    if (typeof first === 'string') {
+      const url = first;
+      // 从URL推断文件名
+      const urlName = url.split('/').pop() || '';
+      if (/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(urlName)) {
+        return { type: 'image', content: '', url, title: urlName };
+      }
+      if (looksLikeUrl(url)) {
+        return { type: 'webpage', content: '', url, title: fieldName };
+      }
+      return { type: 'text', content: url, title: fieldName };
+    }
+    // 对象数组
     const url = first.url || first.previewUrl || first.tmpUrl || '';
     const name = first.name || '';
     if (/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(name)) {
