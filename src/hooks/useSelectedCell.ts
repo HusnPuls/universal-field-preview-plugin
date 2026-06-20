@@ -24,7 +24,13 @@ export function useSelectedCell() {
       
       // 附件字段（type=17）需要用 getAttachmentUrls 获取真实 URL
       if (fieldMeta.type === 17 && field.getAttachmentUrls) {
-        value = await field.getAttachmentUrls(recordId);
+        const urls = await field.getAttachmentUrls(recordId);
+        // getAttachmentUrls 可能返回字符串数组，包装为对象数组以便预览组件识别
+        if (Array.isArray(urls) && urls.length > 0 && typeof urls[0] === 'string') {
+          value = urls.map((url: string) => ({ url, tmpUrl: url, name: '' }));
+        } else {
+          value = urls;
+        }
       } else if (field.getValue) {
         // 其他字段尝试 getValue
         value = await field.getValue(recordId);
