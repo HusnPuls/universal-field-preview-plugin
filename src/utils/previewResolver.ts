@@ -146,6 +146,10 @@ export function resolvePreview(fieldName: string, value: any): ResolvedPreview {
     if (/\.(xml)$/i.test(checkName)) {
       return { type: 'xml', content: url, url, title: checkName };
     }
+    // 附件类型但无法推断：默认尝试图片预览（主图列通常是图片）
+    if (first.type === 'attachment' || first.tmpUrl || first.url) {
+      return { type: 'image', content: '', url, title: checkName || fieldName };
+    }
     if (looksLikeUrl(url)) {
       return { type: 'webpage', content: '', url, title: checkName };
     }
