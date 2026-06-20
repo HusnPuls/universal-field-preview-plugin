@@ -123,11 +123,6 @@ export function resolvePreview(fieldName: string, value: any): ResolvedPreview {
     // 字符串数组（URL数组）
     if (typeof first === 'string') {
       const url = first;
-      // 从URL推断文件名
-      const urlName = url.split('/').pop() || '';
-      if (/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(urlName)) {
-        return { type: 'image', content: '', url, title: urlName };
-      }
       if (looksLikeUrl(url)) {
         return { type: 'webpage', content: '', url, title: fieldName };
       }
@@ -136,22 +131,25 @@ export function resolvePreview(fieldName: string, value: any): ResolvedPreview {
     // 对象数组
     const url = first.url || first.previewUrl || first.tmpUrl || '';
     const name = first.name || '';
-    if (/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(name)) {
-      return { type: 'image', content: '', url, title: name };
+    // 从URL中提取文件名用于判断类型
+    const urlName = url.split('?')[0].split('/').pop() || '';
+    const checkName = name || urlName;
+    if (/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(checkName)) {
+      return { type: 'image', content: '', url, title: checkName };
     }
-    if (/\.(md|markdown)$/i.test(name)) {
-      return { type: 'markdown', content: url, url, title: name };
+    if (/\.(md|markdown)$/i.test(checkName)) {
+      return { type: 'markdown', content: url, url, title: checkName };
     }
-    if (/\.(json)$/i.test(name)) {
-      return { type: 'json', content: url, url, title: name };
+    if (/\.(json)$/i.test(checkName)) {
+      return { type: 'json', content: url, url, title: checkName };
     }
-    if (/\.(xml)$/i.test(name)) {
-      return { type: 'xml', content: url, url, title: name };
+    if (/\.(xml)$/i.test(checkName)) {
+      return { type: 'xml', content: url, url, title: checkName };
     }
     if (looksLikeUrl(url)) {
-      return { type: 'webpage', content: '', url, title: name };
+      return { type: 'webpage', content: '', url, title: checkName };
     }
-    return { type: 'text', content: JSON.stringify(value, null, 2), title: name };
+    return { type: 'text', content: JSON.stringify(value, null, 2), title: checkName };
   }
 
   // 附件类型（单个对象）
