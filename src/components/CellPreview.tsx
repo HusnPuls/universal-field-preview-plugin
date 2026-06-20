@@ -67,8 +67,11 @@ export default function CellPreview({ cell }: Props) {
   const isAttachment = isAttachmentData(cell.value);
   const attachments = Array.isArray(cell.value) ? cell.value : (cell.value ? [cell.value] : []);
   const images = attachments.filter((a: any) => {
-    const name = typeof a === 'string' ? a : (a.name || '');
-    return /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(name);
+    const name = typeof a === 'string' ? '' : (a.name || '');
+    const url = typeof a === 'string' ? a : (a.url || a.tmpUrl || '');
+    const urlName = url.split('?')[0].split('/').pop() || '';
+    const checkName = name || urlName;
+    return /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(checkName);
   });
 
   // 如果当前选中的是图片字段，显示图片预览
