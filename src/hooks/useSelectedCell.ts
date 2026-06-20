@@ -25,9 +25,20 @@ export function useSelectedCell() {
       // 附件字段（type=17）需要用 getAttachmentUrls 获取真实 URL
       if (fieldMeta.type === 17 && field.getAttachmentUrls) {
         const urls = await field.getAttachmentUrls(recordId);
-        // getAttachmentUrls 可能返回字符串数组，包装为对象数组以便预览组件识别
+        // 获取原始附件元数据以保留文件名等信息
+        const record = await table.getRecordById(recordId);
+        const metaArr = record.fields[fieldId] || [];
         if (Array.isArray(urls) && urls.length > 0 && typeof urls[0] === 'string') {
-          value = urls.map((url: string) => ({ url, tmpUrl: url, name: '' }));
+          value = urls.map((url: string, i: number) => {
+            const meta = metaArr[i] || {};
+            return { url, tmpUrl: url, name: meta.name || '', type: meta.type || 'attachment' };
+          });
+        } else if (Array.isArray(urls) && urls.length > 0 && typeof urls[0] === 'object') {
+          // 对象数组：合并元数据
+          value = urls.map((item: any, i: number) => {
+            const meta = metaArr[i] || {};
+            return { ...item, url: item.url || item.tmpUrl, tmpUrl: item.tmpUrl || item.url, name: item.name || meta.name || '' };
+          });
         } else {
           value = urls;
         }
