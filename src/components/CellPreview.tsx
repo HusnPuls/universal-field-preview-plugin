@@ -40,6 +40,9 @@ function getIconByType(type: PreviewType) {
 function isAttachmentData(value: any): boolean {
   if (Array.isArray(value) && value.length > 0) {
     const first = value[0];
+    if (typeof first === 'string') {
+      return /^https?:\/\/.+/i.test(first);
+    }
     return !!(first?.url || first?.tmpUrl || first?.type === 'attachment' || first?.previewUrl || first?.name);
   }
   if (value && typeof value === 'object' && !Array.isArray(value)) {
@@ -63,9 +66,10 @@ export default function CellPreview({ cell }: Props) {
   // 附件类型：拆分为主图和附件列表
   const isAttachment = isAttachmentData(cell.value);
   const attachments = Array.isArray(cell.value) ? cell.value : (cell.value ? [cell.value] : []);
-  const images = attachments.filter((a: any) =>
-    /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(a.name || '')
-  );
+  const images = attachments.filter((a: any) => {
+    const name = typeof a === 'string' ? a : (a.name || '');
+    return /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(name);
+  });
 
   // 如果当前选中的是图片字段，显示图片预览
   if (isAttachment && images.length > 0) {
@@ -132,10 +136,10 @@ export default function CellPreview({ cell }: Props) {
               }}
             >
               {getIconByType(
-                /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(a.name) ? 'image' :
-                /\.(md|markdown)$/i.test(a.name) ? 'markdown' :
-                /\.(json)$/i.test(a.name) ? 'json' :
-                /\.(xml)$/i.test(a.name) ? 'xml' :
+                (typeof a === 'string' ? a : (a.name || '')).match(/\.(jpg|jpeg|png|gif|webp|svg)$/) ? 'image' :
+                (typeof a === 'string' ? a : (a.name || '')).match(/\.(md|markdown)$/) ? 'markdown' :
+                (typeof a === 'string' ? a : (a.name || '')).match(/\.(json)$/) ? 'json' :
+                (typeof a === 'string' ? a : (a.name || '')).match(/\.(xml)$/) ? 'xml' :
                 'code'
               )}
             </Box>
@@ -156,10 +160,10 @@ export default function CellPreview({ cell }: Props) {
             <ImageIcon fontSize="small" color="action" />
             <Box>
               <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
-                {currentImg?.name || '未知文件'}
+                {typeof currentImg === 'string' ? '图片' : (currentImg?.name || '未知文件')}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {currentImg?.size ? `${(currentImg.size / 1024).toFixed(2)} KB` : ''} · 图片
+                {typeof currentImg !== 'string' && currentImg?.size ? `${(currentImg.size / 1024).toFixed(2)} KB` : ''} · 图片
               </Typography>
             </Box>
           </Box>
@@ -168,8 +172,8 @@ export default function CellPreview({ cell }: Props) {
               size="small"
               onClick={() => {
                 const a = document.createElement('a');
-                a.href = currentImg?.url || currentImg?.previewUrl || currentImg?.tmpUrl || '';
-                a.download = currentImg?.name || 'download';
+                a.href = typeof currentImg === 'string' ? currentImg : (currentImg?.url || currentImg?.previewUrl || currentImg?.tmpUrl || '');
+                a.download = typeof currentImg === 'string' ? 'download' : (currentImg?.name || 'download');
                 a.click();
               }}
             >
@@ -181,8 +185,8 @@ export default function CellPreview({ cell }: Props) {
         {/* 图片预览 */}
         <Box flex={1} overflow="auto" display="flex" justifyContent="center" alignItems="center" p={1} minHeight={0}>
           <ImagePreview
-            url={currentImg?.url || currentImg?.previewUrl || currentImg?.tmpUrl || ''}
-            title={currentImg?.name}
+            url={typeof currentImg === 'string' ? currentImg : (currentImg?.url || currentImg?.previewUrl || currentImg?.tmpUrl || '')}
+            title={typeof currentImg === 'string' ? '图片' : currentImg?.name}
           />
         </Box>
       </Box>
