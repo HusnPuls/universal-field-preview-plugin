@@ -107,13 +107,13 @@ function isAttachmentArray(value: any): boolean {
   if (typeof first === 'string') {
     return looksLikeUrl(first);
   }
-  return !!(first?.url || first?.tmpUrl || first?.type === 'attachment' || first?.name);
+  return !!(first?.downloadUrl || first?.thumbnailUrl || first?.url || first?.tmpUrl || first?.type === 'attachment' || first?.name || first?.token);
 }
 
 /** 检查是否为附件对象 */
 function isAttachmentObject(value: any): boolean {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
-  return !!(value.url || value.tmpUrl || value.type === 'attachment' || value.name);
+  return !!(value.downloadUrl || value.thumbnailUrl || value.url || value.tmpUrl || value.type === 'attachment' || value.name || value.token);
 }
 
 export function resolvePreview(fieldName: string, value: any): ResolvedPreview {
@@ -128,8 +128,8 @@ export function resolvePreview(fieldName: string, value: any): ResolvedPreview {
       }
       return { type: 'text', content: url, title: fieldName };
     }
-    // 对象数组
-    const url = first.url || first.previewUrl || first.tmpUrl || '';
+    // 对象数组 - 优先使用 thumbnailUrl || downloadUrl（与原插件一致）
+    const url = first.thumbnailUrl || first.downloadUrl || first.url || first.previewUrl || first.tmpUrl || '';
     const name = first.name || '';
     // 从URL中提取文件名用于判断类型
     const urlName = url.split('?')[0].split('/').pop() || '';
@@ -147,7 +147,7 @@ export function resolvePreview(fieldName: string, value: any): ResolvedPreview {
       return { type: 'xml', content: url, url, title: checkName };
     }
     // 附件类型但无法推断：默认尝试图片预览（主图列通常是图片）
-    if (first.type === 'attachment' || first.tmpUrl || first.url) {
+    if (first.type === 'attachment' || first.downloadUrl || first.thumbnailUrl || first.tmpUrl || first.url) {
       return { type: 'image', content: '', url, title: checkName || fieldName };
     }
     if (looksLikeUrl(url)) {
@@ -158,7 +158,7 @@ export function resolvePreview(fieldName: string, value: any): ResolvedPreview {
 
   // 附件类型（单个对象）
   if (isAttachmentObject(value)) {
-    const url = value.url || value.previewUrl || value.tmpUrl || '';
+    const url = value.thumbnailUrl || value.downloadUrl || value.url || value.previewUrl || value.tmpUrl || '';
     const name = value.name || '';
     if (/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(name)) {
       return { type: 'image', content: '', url, title: name };
