@@ -43,10 +43,10 @@ function isAttachmentData(value: any): boolean {
     if (typeof first === 'string') {
       return /^https?:\/\/.+/i.test(first);
     }
-    return !!(first?.url || first?.tmpUrl || first?.type === 'attachment' || first?.previewUrl || first?.name);
+    return !!(first?.downloadUrl || first?.thumbnailUrl || first?.url || first?.tmpUrl || first?.type === 'attachment' || first?.previewUrl || first?.name || first?.token);
   }
   if (value && typeof value === 'object' && !Array.isArray(value)) {
-    return !!(value.url || value.tmpUrl || value.type === 'attachment' || value.previewUrl || value.name);
+    return !!(value.downloadUrl || value.thumbnailUrl || value.url || value.tmpUrl || value.type === 'attachment' || value.previewUrl || value.name || value.token);
   }
   return false;
 }
@@ -68,7 +68,7 @@ export default function CellPreview({ cell }: Props) {
   const attachments = Array.isArray(cell.value) ? cell.value : (cell.value ? [cell.value] : []);
   const images = attachments.filter((a: any) => {
     const name = typeof a === 'string' ? '' : (a.name || '');
-    const url = typeof a === 'string' ? a : (a.url || a.tmpUrl || '');
+    const url = typeof a === 'string' ? a : (a.thumbnailUrl || a.downloadUrl || a.url || a.tmpUrl || '');
     const urlName = url.split('?')[0].split('/').pop() || '';
     const checkName = name || urlName;
     return /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(checkName);
@@ -135,7 +135,7 @@ export default function CellPreview({ cell }: Props) {
               size="small"
               onClick={() => {
                 const a = document.createElement('a');
-                a.href = typeof currentImg === 'string' ? currentImg : (currentImg?.url || currentImg?.previewUrl || currentImg?.tmpUrl || '');
+                a.href = typeof currentImg === 'string' ? currentImg : (currentImg?.downloadUrl || currentImg?.thumbnailUrl || currentImg?.url || currentImg?.tmpUrl || '');
                 a.download = typeof currentImg === 'string' ? 'download' : (currentImg?.name || 'download');
                 a.click();
               }}
@@ -148,7 +148,7 @@ export default function CellPreview({ cell }: Props) {
         {/* 图片预览 */}
         <Box flex={1} overflow="auto" display="flex" justifyContent="center" alignItems="center" p={1} minHeight={0}>
           <ImagePreview
-            url={typeof currentImg === 'string' ? currentImg : (currentImg?.url || currentImg?.previewUrl || currentImg?.tmpUrl || '')}
+            url={typeof currentImg === 'string' ? currentImg : (currentImg?.thumbnailUrl || currentImg?.downloadUrl || currentImg?.url || currentImg?.tmpUrl || '')}
             title={typeof currentImg === 'string' ? '图片' : currentImg?.name}
           />
         </Box>
